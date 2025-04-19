@@ -7,4 +7,18 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Resources\ttsmaker-file-2025-4-19-1-24-16.wav" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\ttsmaker-file-2025-4-19-1-24-16.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Windows.Extensions" Version="9.0.4" />
+  </ItemGroup>
+
 </Project>
