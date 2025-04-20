@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Media;
+using System.Text.RegularExpressions;
 
 namespace CyberSecurityChatbot
 {
@@ -13,19 +14,20 @@ namespace CyberSecurityChatbot
             Console.Title = "Cybersecurity Awareness Bot";
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            PlayVoiceGreeting();
-            DisplayAsciiArt();
+            PlayVoiceGreeting(); // Play welcome audio (from resources folder)
+            DisplayAsciiArt(); // Show startup banner
 
             Console.Write("Please enter your name: ");
             string userName = Console.ReadLine();
             Console.WriteLine();
             DisplayDivider();
-            TypeEffect($"Hello, {userName}! I'm your Cybersecurity Awareness Bot.", 35);
+            TypeEffect($"Hello, {userName}! I'm your Cybersecurity Awareness Bot.", 35); // Personalized welcome
             DisplayDivider();
 
-            ChatLoop(userName);
+            ChatLoop(userName); // Start chat loop
         }
 
+        // Play a pre-recorded welcome message from 
         static void PlayVoiceGreeting()
         {
             try
@@ -39,6 +41,7 @@ namespace CyberSecurityChatbot
             }
         }
 
+        // Display ASCII art banner
         static void DisplayAsciiArt()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -51,6 +54,7 @@ namespace CyberSecurityChatbot
             Console.ResetColor();
         }
 
+        // Print a visual divider (easy on the eyes)
         static void DisplayDivider()
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -58,6 +62,7 @@ namespace CyberSecurityChatbot
             Console.ResetColor();
         }
 
+        // Simulates typing effect
         static void TypeEffect(string message, int delay = 20)
         {
             foreach (char c in message)
@@ -68,81 +73,65 @@ namespace CyberSecurityChatbot
             Console.WriteLine();
         }
 
+        // Main chatbot interaction loop (accepts username parameter)
         static void ChatLoop(string userName)
         {
-            var topicTips = new Dictionary<int, (string Title, string[] Tips)>
+            // Advice content strings 
+            var passwordAdvice = string.Join("\n", new[]
             {
-                { 1, ("🔐 Password Safety Tips:", new[]
-                    {
-                        "1.) Use long, unique passwords for each site.",
-                        "   - A strong password should be at least 12 characters long and contain a mix of upper/lowercase letters, numbers, and symbols.",
-                        "   - Example: 'A3#r9lX7mQ' is stronger than 'password123'.",
-                        "2.) Avoid using the same password for multiple sites.",
-                        "   - If one account gets breached, others won't be compromised.",
-                        "3.) Use a password manager.",
-                        "   - It helps generate and store complex passwords securely."
-                    })
-                },
-                { 2, ("🎣 Phishing Alert:", new[]
-                    {
-                        "1.) Be cautious with urgent or unexpected emails.",
-                        "   - Phishing emails often try to create panic to trick you into clicking links or giving away info.",
-                        "2.) Always verify the sender's email address.",
-                        "   - Look out for strange characters or unfamiliar domains.",
-                        "3.) Never download attachments from unknown sources.",
-                        "   - These could contain malware or viruses."
-                    })
-                },
-                { 3, ("🌐 Safe Browsing 101:", new[]
-                    {
-                        "1.) Always use HTTPS websites.",
-                        "   - HTTPS encrypts your connection, protecting your data from interception.",
-                        "2.) Avoid clicking pop-ups and suspicious ads.",
-                        "   - These can redirect to malicious websites.",
-                        "3.) Use a VPN on public Wi-Fi.",
-                        "   - It adds a layer of encryption to keep your browsing private."
-                    })
-                }
+                "1.) Use long, unique passwords for each site.",
+                "   - A strong password should be at least 12 characters long and contain a mix of upper/lowercase letters, numbers, and symbols, or is simply something that's very hard to guess.",
+                "   - Example: 'A3#r9lX7mQ' is far stronger than 'password123'.",
+                "2.) Avoid using the same password for multiple sites.",
+                "   - If one account gets breached, others won't be compromised.",
+                "3.) Use a password manager.",
+                "   - It helps generate and store complex passwords securely."
+            });
+
+            var phishingAdvice = string.Join("\n", new[]
+            {
+                "1.) Be cautious with urgent or unexpected emails.",
+                "   - Phishing emails often try to create panic to trick you into clicking links or giving away info.",
+                "2.) Always verify the sender's email address.",
+                "   - Look out for strange characters or unfamiliar domains.",
+                "3.) Never download attachments from unknown sources.",
+                "   - These could contain malware or viruses."
+            });
+
+            var browsingAdvice = string.Join("\n", new[]
+            {
+                "1.) Always use HTTPS websites.",
+                "   - HTTPS encrypts your connection, protecting your data from interception.",
+                "2.) Avoid clicking pop-ups and suspicious ads.",
+                "   - These can redirect to malicious websites or files.",
+                "3.) Use a VPN on public Wi-Fi.",
+                "   - It adds a layer of encryption to keep your browsing private."
+            });
+
+            // Keywords mapped to advice responses using regex patterns
+            var regexResponses = new Dictionary<string, string>
+            {
+                { @"\b(password|credentials|login)\b", passwordAdvice },
+                { @"\b(phishing|scam|fake email|fraud)\b", phishingAdvice },
+                { @"\b(https|vpn|wifi|browsing|internet)\b", browsingAdvice },
+                { @"\b(hello|hi|hey|yo)\b", "👋 Hello there! I'm here to help you stay safe online. Ask me about passwords, phishing, or safe browsing!" },
+                { @"\b(how are you|how's it going|how do you do)\b", "😊 I'm just a bunch of code, but I'm running smoothly! Let's keep your digital life secure." },
+                { @"\b(what are you|what is your purpose|what do you do|who are you)\b", "🤖 I'm your Cybersecurity Awareness Bot, here to teach you the best practices to stay safe online!" }
             };
 
-            var keywordResponses = new Dictionary<string[], string>
-            {
-                {
-                    new[] { "password", "strong password", "login", "credentials" },
-                    string.Join("\n", topicTips[1].Tips)
-                },
-                {
-                    new[] { "phishing", "scam", "fake email", "link" },
-                    string.Join("\n", topicTips[2].Tips)
-                },
-                {
-                    new[] { "safe browsing", "internet", "web", "wifi", "surfing" },
-                    string.Join("\n", topicTips[3].Tips)
-                },
-                {
-                    new[] { "hello", "hi", "hey", "yo" },
-                    "👋 Hello there! I'm here to help you learn how to stay safe online. Ask me about passwords, phishing, or safe browsing!"
-                },
-                {
-                    new[] { "how are you", "how's it going", "how do you do" },
-                    "😊 I'm just a bunch of code, but I'm running smoothly! Let's keep your digital life secure."
-                },
-                {
-                    new[] { "what are you", "what is your purpose", "what do you do", "who are you" },
-                    "🤖 I'm your Cybersecurity Awareness Bot, designed to teach and guide you on best practices for staying safe online!"
-                }
-            };
-
+            // Display options for predefined topics
             var topicOptions = new Dictionary<int, string>
             {
                 { 1, "Password Safety" },
                 { 2, "Phishing & Scams" },
                 { 3, "Safe Browsing" },
-                { 4, "Have a custom question? Ask away!" }
+                { 4, "Help (Show available prompts)" },
+                { 5, "Exit" }
             };
 
             while (true)
             {
+                // Display menu options
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("What would you like to learn about?");
@@ -152,6 +141,7 @@ namespace CyberSecurityChatbot
                 }
                 Console.ResetColor();
 
+                // Prompt for input
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.Write($"{userName}, type a number or ask a question: ");
@@ -173,25 +163,53 @@ namespace CyberSecurityChatbot
                     break;
                 }
 
-                if (int.TryParse(input, out int choice) && topicTips.ContainsKey(choice))
+                if (int.TryParse(input, out int choice) && topicOptions.ContainsKey(choice))
                 {
-                    var (title, tips) = topicTips[choice];
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine(title);
-                    foreach (var tip in tips)
+                    switch (choice)
                     {
-                        Console.WriteLine(tip);
+                        case 1:
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            TypeEffect("🔐 Password Safety Tips:\n", 25);
+                            Console.ResetColor();
+                            TypeEffect(passwordAdvice + "\n", 10);
+                            break;
+                        case 2:
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            TypeEffect("🎣 Phishing Alert:\n", 25);
+                            Console.ResetColor();
+                            TypeEffect(phishingAdvice + "\n", 10);
+                            break;
+                        case 3:
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            TypeEffect("🌐 Safe Browsing 101:\n", 25);
+                            Console.ResetColor();
+                            TypeEffect(browsingAdvice + "\n", 10);
+                            break;
+                        case 4:
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            TypeEffect("📚 Help Menu — Try Asking Me About:\n", 25);
+                            Console.ResetColor();
+                            TypeEffect("- Passwords (e.g., 'How do I create a strong password?')\n" +
+                                       "- Phishing (e.g., 'How can I spot a scam email?')\n" +
+                                       "- Safe Browsing (e.g., 'Is public Wi-Fi safe to use?')\n" +
+                                       "- Say 'hello', 'how are you', or ask my purpose\n" +
+                                       "- Type 'exit' or choose option 5 to leave\n", 10);
+                            break;
+                        case 5:
+                            Console.WriteLine("👋 Stay safe out there!");
+                            return;
+                        default:
+                            break;
                     }
-                    Console.ResetColor();
                 }
                 else
                 {
                     bool matched = false;
-                    foreach (var entry in keywordResponses)
+                    foreach (var pattern in regexResponses)
                     {
-                        if (entry.Key.Any(keyword => input.Contains(keyword)))
+                        if (Regex.IsMatch(input, pattern.Key))
                         {
-                            TypeEffect(entry.Value);
+                            TypeEffect(pattern.Value);
                             matched = true;
                             break;
                         }
