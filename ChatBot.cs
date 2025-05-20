@@ -1,7 +1,8 @@
-﻿using CyberSecurityChatBot.Services;
+﻿using CyberSecurityChatBot.Data;
 using CyberSecurityChatBot.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace CyberSecurityChatBot
@@ -10,89 +11,29 @@ namespace CyberSecurityChatBot
     {
         private static readonly Random _rng = new();
 
-        //Variable advice strings
-        private static readonly string[] PasswordAdvice =
+       
+        //follow up
+        private static readonly string[] FollowUps =
         {
-            //Set A for PasswordAdvice
-            string.Join("\n", new[]
-            {
-            "1.) Use long, unique passwords for each site.",
-            "   - A strong password should be at least 12 characters long and contain a mix of upper/lowercase letters, numbers, and symbols.",
-            "   - Example: 'A3#r9lX7mQ' is far stronger than 'password123'.",
-            "2.) Avoid using the same password for multiple sites.",
-            "3.) Use a reputable password manager to store and generate strong passwords."
-        }),
-            //Set B for PasswordAdvice
-            string.Join("\n",new[]
-                {
-             "🔑  Keep every password unique and 12+ chars.",
-            "💡  Mix upper/lowercase letters, numbers, and symbols.",
-            "🔒  One account hacked ≠ all accounts hacked.",
-            "✅  A password manager remembers the complexity for you."
-                })
-                };
-
-
-
-        private static readonly string[] PhishingAdvice =
-            {
-            //set A for Phising Advice
-            string.Join("\n", new[]
+            "tell me more", "what else", "why", "how", "expand", "can you explain", "more", "continue", "that’s confusing"
+        };
+        //clear memory. 
+        private static readonly string[] ResetPhrases =
         {
-            "1.) Be cautious with urgent or unexpected emails.",
-            "2.) Verify the sender’s email address carefully.",
-            "3.) Never download attachments from unknown sources."
-        }),
-            //set B for Phising Advice
-            string.Join("\n", new[]
-        {
-                "1.) Be cautious with urgent or unexpected emails.",
-            "2.) Verify the sender’s email address carefully.",
-            "3.) Never download attachments from unknown sources."
-            })
+            "new topic", "change topic", "switch", "let's talk about something else", "different question"
         };
 
-        private static readonly string[] BrowsingAdvice =
-            {
-            string.Join("\n", new[]
-        {
-            "1.) Always use HTTPS websites.",
-            "2.) Avoid clicking pop‑ups and suspicious ads.",
-            "3.) Use a VPN when browsing on public Wi‑Fi."
-        }),
-            //set B
-            string.Join("\n", new[]
-            {
-                "1.) Always use HTTPS websites.",
-            "2.) Avoid clicking pop‑ups and suspicious ads.",
-            "3.) Use a VPN when browsing on public Wi‑Fi."
-            })
-        };
+        // Memory fields
+        private static string? _userNameMemory = null;
+        private static string? _currentTopic = null;
+        private static string? _userInterest = null;
 
-
-        // ---------- regex map ----------
-        private static readonly Dictionary<string, string[]> RegexResponses = new()
-        {
-            { @"\b(password|credentials|login)\b",      PasswordAdvice },
-            { @"\b(phishing|scam|fake email|fraud)\b",  PhishingAdvice },
-            { @"\b(https|vpn|wifi|browsing|internet)\b", BrowsingAdvice },
-            { @"\b(hello|hi|hey|yo)\b", new[] { "👋 Hello! Ask me about passwords, phishing, or safe browsing."} },
-            { @"\b(how are you|how's it going|how do you do)\b", new[] { "😊 I'm running smoothly and ready to help keep you safe online!" } },
-            { @"\b(who are you|what are you|purpose)\b", new[] {"🤖 I'm a Cybersecurity Awareness Bot designed to share safety tips." } }
-        };
-
-        // ---------- minimal topic menu ----------
-        private const string MenuText =
-            "\n1. Password Safety\n" +
-            "2. Phishing & Scams\n" +
-            "3. Safe Browsing\n" +
-            "Type 1‑3, or just ask naturally. Type 'help' to see this menu again.\n";
-
-        // ---------- public entry ----------
         public static void Start(string userName)
         {
+            _userNameMemory = userName;
+
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(MenuText);
+            Console.WriteLine(ChatBotData.MenuText);
             Console.ResetColor();
 
             while (true)
@@ -101,60 +42,157 @@ namespace CyberSecurityChatBot
                 Console.Write($"{userName} › ");
                 Console.ResetColor();
 
-                string input = Console.ReadLine()?.ToLower().Trim();
+                string input = Console.ReadLine()?.ToLower().Trim() ?? "";
+
                 if (string.IsNullOrWhiteSpace(input))
                 {
-                    Console.WriteLine("⚠️  Please say something.");
+                    Console.WriteLine("⚠️ Please say something.");
                     continue;
                 }
 
-                if (input is "exit" or "quit")
+                if (InputValidator.IsQuitCommand(input))
                 {
                     Console.WriteLine("👋 Stay safe out there!");
                     break;
                 }
 
-                if (input is "menu" or "help")
+                if (InputValidator.IsHelpCommand(input))
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(MenuText);
+                    Console.WriteLine(ChatBotData.MenuText);
                     Console.ResetColor();
                     continue;
                 }
 
-                // numeric shortcuts 1‑3
-                if (int.TryParse(input, out int n))
+                if (InputValidator.TryGetMenuChoice(input, out int n))
                 {
                     input = n switch
                     {
                         1 => "password",
                         2 => "phishing",
                         3 => "https",
+                        4 => "vpn",
+                        5 => "privacy",
                         _ => input
                     };
                 }
+                else if (int.TryParse(input, out _))
+                {
+                    Console.WriteLine("❌ That number doesn’t match any topic. Please choose 1-5.");
+                    continue;
+                }
+
+                if (InputValidator.IsGibberish(input))
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("🤖 That doesn’t look like a question—try asking about passwords, phishing, safe browsing, VPNs, or privacy.");
+                    Console.WriteLine();
+                    continue;
+                }
+
+                // Reset current topic if reset phrase is detected
+                if (ResetPhrases.Any(p => input.Contains(p)))
+                {
+                    _currentTopic = null;
+                    Console.WriteLine();
+                    Console.WriteLine("🔄 Got it! Let’s start a new topic.");
+                    Console.WriteLine();
+                    continue;
+                }
 
                 bool matched = false;
-                foreach (var kvp in RegexResponses)
+
+                // Check if user is asking a follow-up
+                bool isFollowUp = FollowUps.Any(phrase => input.Contains(phrase)) && _currentTopic != null;
+
+                if (isFollowUp)
                 {
-                    if (Regex.IsMatch(input, kvp.Key))
+                    foreach (var kvp in ChatBotData.RegexResponses)
                     {
-                        string response = kvp.Value[_rng.Next(kvp.Value.Length)];
-                        TextEffects.TypeEffect(response, 10);
+                        if (kvp.Key == _currentTopic)
+                        {
+                            string followUpResponse = kvp.Value[_rng.Next(kvp.Value.Length)];
+                            PrintBotResponse(followUpResponse);
+                            matched = true;
+                            break;
+                        }
+                    }
 
+                    if (matched) continue;
+                }
 
+                // Sentiment detection
+                string? sentimentMessage = null;
+                string? topicResponse = null;
 
-                        matched = true;
+                foreach (var kvp in ChatBotData.SentimentKeywords)
+                {
+                    if (input.Contains(kvp.Key))
+                    {
+                        sentimentMessage = kvp.Value;
                         break;
                     }
                 }
 
+                // Topic detection
+                foreach (var kvp in ChatBotData.RegexResponses)
+                {
+                    if (Regex.IsMatch(input, kvp.Key))
+                    {
+                        _currentTopic = kvp.Key;
+                        _userInterest = _currentTopic; // store interest
+                        topicResponse = kvp.Value[_rng.Next(kvp.Value.Length)];
+                        break;
+                    }
+                }
+
+                if (sentimentMessage != null || topicResponse != null)
+                {
+                    Console.WriteLine();
+
+                    if (sentimentMessage != null)
+                        TextEffects.TypeEffect($"I understand that {_userNameMemory}, {sentimentMessage}", 15);//prints users name and sentiment statement
+
+                    if (topicResponse != null)
+                    {
+                        if (_userInterest != null && sentimentMessage == null)
+                        {
+                            Console.WriteLine($"🤖 Since you're interested in this, here's something useful:");
+                        }
+                        PrintBotResponse(topicResponse);
+                    }
+
+                    continue;
+                }
+
+                // Fallback response
                 if (!matched)
                 {
-                    TextEffects.TypeEffect("🤔 I’m not sure about that. Try passwords, phishing, or safe browsing tips.");
+                    if (_userInterest != null)
+                    {
+                        Console.WriteLine($"🤔 You’ve previously shown interest in {_userInterest.Replace(@"\b", "")}. Would you like to revisit that?");
+                    }
+                    else
+                    {
+                        PrintBotResponse("🤖 I'm not quite sure how to respond to that. Try asking about passwords, phishing, VPNs, or privacy.");
+                    }
                 }
             }
         }
+
+        private static void PrintBotResponse(string message)
+        {
+            Console.WriteLine(); // Blank line before bot reply
+
+            string[] lines = message.Split('\n');
+            foreach (string line in lines)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"Bot 🤖 › {line}");
+            }
+
+            Console.ResetColor();
+            Console.WriteLine();
+        }
     }
 }
-

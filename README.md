@@ -24,31 +24,58 @@ Select options from the menu (e.g., 1 for Password Safety, 2 for Phishing, etc.)
 Or type natural language questions.
 Here are some example prompts the bot understands:
 
-🟢 Password Safety
+📚 Topics You Can Ask About
+-->
 
-"How do I make a strong password?"
-"Tell me about login security."
+🟢 Password Safety
+Example questions:
+
+"How do I create a strong password?"
+"Tell me about passwords."
 "What are good credentials?"
 
 🟡 Phishing & Scams
+Example questions:
 
-"How do I spot a scam email?"
-"What is phishing?"
+"How do I spot a phishing email?"
+"What is a scam?"
 "I think I got a fraud email."
+
 🔵 Safe Browsing
+Example questions:
 
 "Is public Wi-Fi safe?"
-"Should I use a VPN?"
-"What's a secure website?"
+"Should I use HTTPS?"
+"What is safe browsing?"
+
+🟣 VPNs (Virtual Private Networks)
+Example questions:
+
+"What is a VPN?"
+"Should I use a VPN on public Wi-Fi?"
+"Are free VPNs safe?"
+
+
+
+🟤 Privacy Protection
+Example questions:
+
+"How do I protect my privacy?"
+"What about personal info online?"
+"How do I adjust privacy settings?"
+
+
+
 💬 Bot Small Talk
 
 "Hello"
 "How are you?"
 "What is your purpose?"
+
 ⛔ Exit
 
 "exit"
 "quit"
-For a full list of prompts, type help or choose option 4 from the menu.
+For a full list of prompts, type help 
 
 repo link: https://github.com/TameezLambat/CyberSecurityBotPROG6221
