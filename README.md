@@ -4,19 +4,29 @@ The Cybersecurity Awareness Bot is a text-based chatbot designed to help users l
 
 Features
 Voice Greeting: Welcomes users with an audio message.
+
 Interactive Chat: Users can ask questions about cybersecurity or choose from predefined topics.
+
 Helpful Responses: Provides cybersecurity tips for Password Safety, Phishing, and Safe Browsing.
+
 Help Menu: Displays available commands and topics the user can ask about.
+
 Exit Option: Lets the user exit the chatbot at any time.
-How to Run
+
+How to Run:
 Clone or download the repository to your local machine.
+
 Ensure you have .NET Core SDK installed (you can check via the command dotnet --version).
+
 Open a terminal/command prompt and navigate to the project directory.
-Run the bot using the following command:
+
 Follow the on-screen prompts to interact with the chatbot.
+
 Requirements
 .NET Core SDK (version 5.0 or higher)
+
 Sound Files: Ensure the Resources folder contains the necessary audio files for the voice greeting.
+
 Example Usage
 After running the bot and entering your name, you can:
 
