@@ -8,7 +8,7 @@
         { "worried", "😟 It's okay to feel that way. Cybersecurity can be scary, but I'm here to help you through it." },
         { "anxious", "😟 You’re not alone—security concerns can be overwhelming. Let's take it one step at a time." },
         { "nervous", "😟 Feeling nervous is normal. I’ve got your back—ask anything, anytime." },
-        { "scared", "😟 Cyber threats can sound intense, but don’t worry. You're in a safe place to learn and protect yourself." },
+        { "scared", "😟 Cyber threats can sound intense, but don’t worry. You're in a safe place to learn and protect yourself Online." },
 
         // Confused / Lost
         { "confused", "🤔 I can help clarify! Ask me anything about passwords, phishing, or safe browsing." },
@@ -141,56 +141,51 @@
                 "🧹 Clear cookies and cache frequently to protect your browsing privacy."
             })
         };
-        public static readonly Dictionary<string, string[]> PersistentInterestResponses = new()
+        public static readonly Dictionary<string, (string Pattern, string[] Responses)> RegexResponses = new()
 {
-    { @"\b(password|credentials|login)\b", new[]
-        {
-            "🔁 You’ve brought up passwords a few times — it’s great that you're focused on this. Here’s another tip:",
-        }
+    { "password", (@"\b(password|credentials|login|pass key)\b", PasswordAdvice) },
+    { "phishing", (@"\b(phishing|scam|fake email|fraud)\b", PhishingAdvice) },
+    { "safeBrowsing", (@"\b(safeBrowsing|https|browsing|internet|safe browsing|secure connection)\b", BrowsingAdvice) },
+    { "vpn", (@"\b(vpn|virtual private network)\b", VPNAdvice) },
+    { "privacy", (@"\b(privacy|personal info|data protection|private)\b", PrivacyAdvice) }
+};
+
+        public static readonly Dictionary<string, string> TopicLabels = new()
+{
+    { "password", "passwords" },
+    { "phishing", "phishing and scams" },
+    { "safeBrowsing", "safe browsing" },
+    { "vpn", "VPNs" },
+    { "privacy", "privacy" }
+};
+
+        public static readonly Dictionary<string, string[]> BotStatusResponses = new()
+{
+    { "how are you", new[] {
+        "I'm just a bunch of code, but I'm functioning well! 😄",
+        "All systems operational! How can I assist you today?",
+        "Feeling cyber-secure as always. Thanks for asking!",
+        "I'm doing great, thanks! Ready to help you stay safe online." }
     },
-    { @"\b(phishing|scam|fake email|fraud)\b", new[]
-        {
-            "🔁 It’s clear phishing and scams matter to you. Staying vigilant is smart — here's more advice:",
-        }
+    { "what's up", new[] {
+        "Not much, just analyzing threats and giving advice. How about you?",
+        "Same old, same old — protecting data and giving tips!",
+        "All good here! Just waiting to chat about cybersecurity. 🔐" }
     },
-    { @"\b(https|browsing|internet|safe browsing)\b", new[]
-        {
-            "🔁 You’ve revisited browsing safety a lot — it’s worth mastering. Check this out:",
-        }
-    },
-    { @"\b(vpn|virtual private network)\b", new[]
-        {
-            "🔁 You’re really digging into VPNs — that’s awesome. One more tip for the road:",
-        }
-    },
-    { @"\b(privacy|personal info|data protection|private)\b", new[]
-        {
-            "🔁 You’ve asked about privacy multiple times — here’s another nugget of advice:",
-        }
+    { "how's it going", new[] {
+        "Going well on the digital front! How can I help?",
+        "No malware in sight — it's a good day!",
+        "All smooth sailing in cyberspace. What brings you here today?" }
     }
 };
 
-
-
-        public static readonly Dictionary<string, string[]> RegexResponses = new()
-        {
-            { @"\b(password|credentials|login|pass key|)\b", PasswordAdvice },
-            { @"\b(phishing|scam|fake email|fraud)\b", PhishingAdvice },
-            { @"\b(https|browsing|internet|safe browsing|secure connection)\b", BrowsingAdvice },
-            { @"\b(vpn|virtual private network)\b", VPNAdvice },
-            { @"\b(privacy|personal info|data protection|private)\b", PrivacyAdvice },
-            { @"\b(hello|hi|hey|yo)\b", new[] { "👋 Hello! Ask me about passwords, phishing, or safe browsing." } },
-            { @"\b(how are you|how's it going|how do you do)\b", new[] { "😊 I'm running smoothly and ready to help keep you safe online!" } },
-            { @"\b(who are you|what are you|purpose)\b", new[] { "🤖 I'm a Cybersecurity Awareness Bot designed to share safety tips." } }
-
-        };
-        public static readonly Dictionary<string, string> TopicLabels = new()
+        public static readonly Dictionary<string, string[]> PersistentInterestResponses = new()
 {
-    { @"\b(password|credentials|login)\b", "passwords" },
-    { @"\b(phishing|scam|fake email|fraud)\b", "phishing and scams" },
-    { @"\b(https|browsing|internet|safe browsing)\b", "safe browsing" },
-    { @"\b(vpn|virtual private network)\b", "VPNs" },
-    { @"\b(privacy|personal info|data protection|private)\b", "privacy" }
+    { "password", new[] { "🔁 You’ve brought up passwords a few times — it’s great that you're focused on this. Here’s another tip:" } },
+    { "phishing", new[] { "🔁 It’s clear phishing and scams matter to you. Staying vigilant is smart — here's more advice:" } },
+    { "safeBrowsing", new[] { "🔁 You’ve revisited browsing safety a lot — it’s worth mastering. Check this out:" } },
+    { "vpn", new[] { "🔁 You’re really digging into VPNs — that’s awesome. One more set of tips for the road:" } },
+    { "privacy", new[] { "🔁 You’ve asked about privacy multiple times — here’s another set of advice:" } }
 };
 
 
@@ -203,3 +198,4 @@
             "Type 1-5, or just ask naturally. Type 'help' to see this menu again.\n";
     }
 }
+
